@@ -6,7 +6,7 @@
 #include <arpa/inet.h>
 #include <vector>
 #include <string>
-
+#include <stdarg.h>
 
 struct Server;
 struct Client 
@@ -16,6 +16,7 @@ struct Client
 	inline void reset();
 	void writeErr(std::string str);
 	void prepareToSend();
+	void setErr(const char* format, ...);
 
 	int fd;
 	struct sockaddr_in client_addr;
@@ -24,6 +25,7 @@ struct Client
 	std::vector<std::string> argv;
 
 	std::string output_buf;
+
 };
 
 void Client::reset()

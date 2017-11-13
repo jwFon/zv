@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include "event.h"
 #include "zv.h"
+#include <stdio.h>
 
 Client::Client(int fd, const struct sockaddr_in& client_addr, int addr_len) :
 fd(fd), client_addr(client_addr), addr_len(addr_len) {
@@ -66,4 +67,18 @@ void Client::prepareToSend()
 	server.eventLoop->addFileEvent(fd, FILE_EVENT_WRITE,
 		CallbackEvent::getObj<WhenWrite>());
 
+}
+
+void Client::setErr(const char* format, ...)
+{
+	char buf[128];
+	va_list ap;
+	int n;
+
+	va_start(ap, format);
+	n = vsnprintf(buf, 128, format, ap);
+	va_end(ap);
+	
+	buf[n] = 0;
+	output_buf = buf;
 }

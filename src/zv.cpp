@@ -43,9 +43,11 @@ bool Server::process(Client* client)
 	}
 	Cmd* real_cmd = iter->second;
 
-	if (real_cmd->check(client) == false) {
+	if (real_cmd->arity  > client->argc) {
+		client->setErr("+(error) ERR wrong number of arguments for '%s' command\r\n", client->argv[0].c_str());
 		return false;
 	}
+	
 	return real_cmd->process(client);
 }
 

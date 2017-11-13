@@ -9,23 +9,14 @@ do { \
 	} \
 } while(0)
 
-Ping::Ping()  : Cmd("ping") {}
-bool Ping::check(Client *c)
-{
-	return true;
-}
+Ping::Ping()  : Cmd("ping", 0) {}
 bool Ping::process(Client* c)
 {
 	c->output_buf = "+pong\r\n";
 	return true;
 }
 
-Set::Set() : Cmd("set") {}
-bool Set::check(Client *c)
-{
-	CHECK(c->argc >= 3);
-	return true;
-}
+Set::Set() : Cmd("set", 3) {}
 bool Set::process(Client *c)
 {
 	std::string& key = c->argv[1], &value = c->argv[2];
@@ -43,17 +34,10 @@ bool Set::process(Client *c)
 	return true;
 }
 
-Err::Err() : Cmd("err") {}
-bool Err::check(Client *c)
-{
-	return true;
-}
+Err::Err() : Cmd("err", 0) {}
 bool Err::process(Client *c)
 {
-	const char *format = "+(error) ERR unknown command '%s'\r\n";
-	char buf[100];
-	int n = snprintf(buf, 100, format, c->argv[0].c_str());
-	buf[n] = 0;
-	c->output_buf = buf;
+	c->setErr("+(error) ERR unknown command '%s'\r\n", c->argv[0].c_str());
+	
 	return true;
 }

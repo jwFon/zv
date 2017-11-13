@@ -35,6 +35,7 @@ bool WhenRead::operator()(FileEvent* fe)
 	if (readn < 0) {
 		std::cerr << "read error" << std::endl;
 	} else if (readn == 0) {
+		std::cout << "get 0" << std::endl;
 		server.eventLoop->delFileEvent(fe->fd);
 		server.del_client(fe->fd);
 	} else {
@@ -50,9 +51,8 @@ bool WhenRead::operator()(FileEvent* fe)
 		std::cout << "processInputBuf done" << std::endl;
 		if (!server.process(client)) {
 			client->writeErr("process error");
-		} else {
-			client->reset();
 		}
+		client->reset();
 		client->prepareToSend();
 		std::cout << "preapre to send done" << std::endl;
 	}
@@ -190,13 +190,13 @@ bool EventLoop::delFileEvent(int fe_fd, uint32_t del_mask)
 	return true;
 }
 
-bool EventLoop::delFileEvent(int fd)
+bool EventLoop::delFileEvent(int fe_fd)
 {
 	struct epoll_event ev;
 	ev.data.u64 = 0;
 	ev.events = 0;
 
-	FileEvent *fe = fileEvents[fd];
+	FileEvent *fe = fileEvents[fe_fd];
 	if (fe == NULL) {
 		return true;
 	}
@@ -216,7 +216,8 @@ void EventLoop::loop()
 		for (int i = 0; i < read_cnt; i++) {
 			std::cout << read_cnt  << std::endl;
 			struct epoll_event& epoll_ev = events[i];
-			auto* fe = (FileEvent*)events[i].data.ptr;
+			auto* fe = static_cast<FileEvent*>(events[i].data.ptr);
+			std::cout << fe->fd << std::endl;
 			if (epoll_ev.events & EPOLLIN) {
 				(*fe->whenRead)(fe);
 			}
